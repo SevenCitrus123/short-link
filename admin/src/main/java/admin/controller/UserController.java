@@ -1,7 +1,8 @@
 package admin.controller;
 
-import admin.dao.entity.UserDO;
-import admin.dao.mapper.UserMapper;
+import admin.common.convention.result.Result;
+import admin.common.convention.result.Results;
+import admin.common.enums.UserErrorCodeEnum;
 import admin.dto.Resp.UserRespDTO;
 import admin.service.UserServcie;
 import lombok.RequiredArgsConstructor;
@@ -15,19 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
-     private final UserServcie userServcie;
+    private final UserServcie userServcie;
 
     /**
      * 根据用户名查询参数
+     *
      * @param username
      * @return
      */
     @GetMapping("/api/shortlink/v1/user/{username}")
-    public UserRespDTO getUserByUsername(@PathVariable String username) {
-        UserRespDTO userRespDTO = userServcie.getUserByUsername(username);
-        if (userRespDTO == null){
-            return new UserRespDTO();
-        }
-        return userRespDTO;
+    public Result<UserRespDTO> getUserByUsername(@PathVariable String username) {
+        UserRespDTO result = userServcie.getUserByUsername(username);
+        return Results.success(result);
     }
 }
