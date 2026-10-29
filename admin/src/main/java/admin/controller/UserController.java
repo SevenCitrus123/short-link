@@ -22,8 +22,6 @@ public class UserController {
 
     /**
      * 根据用户名查询处理过的参数
-     * @param username
-     * @return
      */
     @GetMapping("/api/short-link/v1/user/{username}")
     public Result<UserRespDTO> getUserByUsername(@PathVariable String username) {
@@ -33,9 +31,6 @@ public class UserController {
 
     /**
      * 根据用户名查询真实参数
-     *
-     * @param username
-     * @return
      */
     @GetMapping("/api/short-link/v1/actual/user/{username}")
     public Result<UserActualRespDTO> getActualUserByUsername(@PathVariable String username) {
@@ -44,19 +39,15 @@ public class UserController {
 
     /**
      * 查询用户名是否存在
-     *
-     * @param username
-     * @return
      */
     @GetMapping("/api/short-link/v1/user/has-username")
     public Result<Boolean> hasUsername(@RequestParam("username") String username) {
-        Boolean result = userServcie.hasUsername(username);
-        if (result == true) {
-            throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
-        }
-        return Results.success(true);
+        return Results.success(userServcie.hasUsername(username));
     }
 
+    /**
+     * 新增用户
+     */
     @PostMapping("/api/short-link/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO) {
         userServcie.register(userRegisterReqDTO);
