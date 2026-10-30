@@ -1,11 +1,12 @@
 package admin.controller;
 
-import admin.common.convention.exception.ClientException;
 import admin.common.convention.result.Result;
 import admin.common.convention.result.Results;
-import admin.common.enums.UserErrorCodeEnum;
+import admin.dto.req.UserLoginReqDTO;
 import admin.dto.req.UserRegisterReqDTO;
+import admin.dto.req.UserUpdateReqDTO;
 import admin.dto.resp.UserActualRespDTO;
+import admin.dto.resp.UserLoginRespDTO;
 import admin.dto.resp.UserRespDTO;
 import admin.service.UserServcie;
 import cn.hutool.core.bean.BeanUtil;
@@ -51,6 +52,41 @@ public class UserController {
     @PostMapping("/api/short-link/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO) {
         userServcie.register(userRegisterReqDTO);
+        return Results.success();
+    }
+
+    /**
+     * 根据用户名修改用户参数
+     */
+    @PutMapping("/api/short-link/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateReqDTO userUpdateReqDTO) {
+        userServcie.update(userUpdateReqDTO);
+        return Results.success();
+    }
+
+    /**
+     * 用户登录
+     */
+    @PostMapping("/api/short-link/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO userLoginReqDTO) {
+        UserLoginRespDTO userLoginRespDTO = userServcie.login(userLoginReqDTO);
+        return Results.success(userLoginRespDTO);
+    }
+
+    /**
+     * 检验用户是否登录
+     */
+    @GetMapping("/api/short-link/v1/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        return Results.success(userServcie.checkLogin(username, token));
+    }
+
+    /**
+     * 用户退出登录
+     */
+    @DeleteMapping("/api/short-link/v1/user/logout")
+    public Result<Void> logOut(@RequestParam("username") String username, @RequestParam("token") String token) {
+        userServcie.logOut(username, token);
         return Results.success();
     }
 }
