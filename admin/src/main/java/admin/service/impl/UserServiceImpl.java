@@ -16,9 +16,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.micrometer.core.instrument.util.TimeUtils;
-import jodd.time.TimeUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -31,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserServcie {
@@ -76,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             if (lock.tryLock()) {
                 int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterReqDTO, UserDO.class));
                 if (inserted < 1) {
-                    throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+                    throw new ClientException(UserErrorCodeEnum.USER_SAVE_FAIL);
                 }
                 stringRBloomFilter.add(userRegisterReqDTO.getUsername());
                 return;
