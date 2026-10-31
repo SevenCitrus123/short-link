@@ -1,5 +1,6 @@
 package admin.service.impl;
 
+import admin.common.biz.user.UserContext;
 import admin.common.convention.exception.ClientException;
 import admin.common.enums.UserErrorCodeEnum;
 import admin.dao.entity.UserDO;
@@ -89,7 +90,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void update(UserUpdateReqDTO userUpdateReqDTO) {
-        //TODO 验证当前用户是否为登录用户
         LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
                 .eq(UserDO::getUsername, userUpdateReqDTO.getUsername());
         baseMapper.update(BeanUtil.toBean(userUpdateReqDTO, UserDO.class), updateWrapper);

@@ -1,0 +1,27 @@
+package admin.config;
+
+import admin.common.biz.user.UserTransmitFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * 用户配置自动装配
+ * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+@Configuration
+public class UserConfiguration {
+
+    /**
+     * 用户信息传递过滤器
+     */
+    @Bean
+    public FilterRegistrationBean<UserTransmitFilter> globalUserTransmitFilter() {
+        FilterRegistrationBean<UserTransmitFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new UserTransmitFilter());
+        registration.addUrlPatterns("/*");
+        registration.setOrder(0);
+        return registration;
+    }
+
+}
