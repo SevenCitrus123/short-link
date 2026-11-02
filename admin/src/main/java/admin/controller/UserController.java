@@ -24,7 +24,7 @@ public class UserController {
     /**
      * 根据用户名查询处理过的参数
      */
-    @GetMapping("/api/short-link/v1/user/{username}")
+    @GetMapping("/api/short-link/admin/v1/user/{username}")
     public Result<UserRespDTO> getUserByUsername(@PathVariable String username) {
         UserRespDTO result = userServcie.getUserByUsername(username);
         return Results.success(result);
@@ -33,7 +33,7 @@ public class UserController {
     /**
      * 根据用户名查询真实参数
      */
-    @GetMapping("/api/short-link/v1/actual/user/{username}")
+    @GetMapping("/api/short-link/admin/v1/actual/user/{username}")
     public Result<UserActualRespDTO> getActualUserByUsername(@PathVariable String username) {
         return Results.success(BeanUtil.toBean(userServcie.getUserByUsername(username), UserActualRespDTO.class));
     }
@@ -41,7 +41,7 @@ public class UserController {
     /**
      * 查询用户名是否存在
      */
-    @GetMapping("/api/short-link/v1/user/has-username")
+    @GetMapping("/api/short-link/admin/v1/user/has-username")
     public Result<Boolean> hasUsername(@RequestParam("username") String username) {
         return Results.success(userServcie.hasUsername(username));
     }
@@ -49,7 +49,7 @@ public class UserController {
     /**
      * 新增用户
      */
-    @PostMapping("/api/short-link/v1/user")
+    @PostMapping("/api/short-link/admin/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO) {
         userServcie.register(userRegisterReqDTO);
         return Results.success();
