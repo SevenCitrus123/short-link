@@ -6,10 +6,13 @@ import admin.common.enums.GroupErrorCodeEnum;
 import admin.dao.entity.GroupDO;
 import admin.dao.mapper.GroupMapper;
 import admin.dto.req.ShortLinkGroupSaveReqDTO;
+import admin.dto.req.ShortLinkGroupSortReqDTO;
+import admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import admin.dto.resp.ShortLinkGroupRespDTO;
 import admin.service.GroupService;
 import admin.util.RandomCodeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -78,6 +81,53 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
             resultList.add(dto);
         }
         return resultList;
+    }
+
+    @Override
+    public void updateGroup(ShortLinkGroupUpdateReqDTO requestParam) {
+        String username = UserContext.getUsername();
+        if (username == null) {
+            throw new ClientException(GroupErrorCodeEnum.GROUP_USER_NAME_NULL);
+        }
+        LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                .eq(GroupDO::getUsername, username)
+                .eq(GroupDO::getGid, requestParam.getGid())
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setName(requestParam.getName());
+        int updated = baseMapper.update(groupDO, updateWrapper);
+        if (updated < 1){
+            throw new ClientException(GroupErrorCodeEnum.GROUP_NULL);
+        }
+    }
+
+    @Override
+    public void deleteGroup(String gid) {
+        String username = UserContext.getUsername();
+        if (username == null) {
+            throw new ClientException(GroupErrorCodeEnum.GROUP_USER_NAME_NULL);
+        }
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, username)
+                .eq(GroupDO::getGid, gid);
+        int deleted = baseMapper.delete(queryWrapper);
+        if (deleted < 1) {
+            throw new ClientException(GroupErrorCodeEnum.GROUP_NULL);
+        }
+    }
+
+    @Override
+    public void sortGroup(List<ShortLinkGroupSortReqDTO> requestParam) {
+        requestParam.forEach(each -> {
+            GroupDO groupDO = GroupDO.builder()
+                    .sortOrder(each.getSortOrder())
+                    .build();
+            LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getGid, each.getGid())
+                    .eq(GroupDO::getDelFlag, 0);
+            baseMapper.update(groupDO, updateWrapper);
+        });
     }
 
 }

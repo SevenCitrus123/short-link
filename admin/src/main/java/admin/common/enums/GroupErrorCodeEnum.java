@@ -3,7 +3,7 @@ package admin.common.enums;
 import admin.common.convention.errorcode.IErrorCode;
 
 public enum GroupErrorCodeEnum implements IErrorCode {
-    GROUP_ERROR("B000300", "短链接组异常"),
+    GROUP_NULL("B000300", "短链接组不存在"),
 
     GROUP_NAME_EXIST("B000301", "短链接组名已存在"),
 
