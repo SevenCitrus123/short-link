@@ -1,7 +1,9 @@
 package project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,9 @@ import project.common.enums.ShortLinkErrorCodeEnum;
 import project.dao.entity.ShortLinkDO;
 import project.dao.mapper.ShortLinkMapper;
 import project.dto.req.ShortLinkCreateReqDTO;
+import project.dto.req.ShortLinkPageReqDTO;
 import project.dto.resp.ShortLinkCreateRespDTO;
+import project.dto.resp.ShortLinkPageRespDTO;
 import project.service.ShortLinkService;
 import project.util.HashUtil;
 
@@ -57,6 +61,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         }
         return BeanUtil.copyProperties(shortLinkDO, ShortLinkCreateRespDTO.class);
     }
+
+    @Override
+    public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam) {
+        if (StrUtil.isBlank(requestParam.getGid())) {
+            throw new ClientException(ShortLinkErrorCodeEnum.SHORT_LINK_ARGS_INVALID);
+        }
+        LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnableStatus, 0)
+                .eq(ShortLinkDO::getDelFlag, 0)
+                .orderByAsc(ShortLinkDO::getCreateTime);
+        IPage<ShortLinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
+        return resultPage.convert(each -> BeanUtil.copyProperties(each, ShortLinkPageRespDTO.class));
+    }
+
 
     private void isValid(ShortLinkCreateReqDTO requestParam) {
         if (requestParam == null) {
