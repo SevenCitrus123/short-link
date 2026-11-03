@@ -13,9 +13,14 @@ import project.service.ShortLinkService;
 @RestController
 @RequiredArgsConstructor
 public class ShortLinkController {
-    private ShortLinkService shortLinkService;
-    @PostMapping("/api/short-link/v1/group")
-    public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam){
-        return Results.success(shortLinkService.createShortLink());
+
+    private final ShortLinkService shortLinkService;
+
+    /**
+     * 新增短链接
+     */
+    @PostMapping("/api/short-link/admin/v1/create")
+    public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
+        return Results.success(shortLinkService.createShortLink(requestParam));
     }
 }
