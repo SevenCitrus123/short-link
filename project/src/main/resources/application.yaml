@@ -2,10 +2,10 @@ server:
   port: 8001
 spring:
   datasource:
-    url: jdbc:mysql://192.168.149.128:3306/link_my?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
-    driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     hikari:
       connection-test-query: select 1
       connection-timeout: 20000

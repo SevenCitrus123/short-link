@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import project.common.convention.exception.ClientException;
@@ -89,6 +88,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     }
 
     public Boolean hasFullShortUrl(String fullShortUrl) {
+        if (!bloomFilter.contains(fullShortUrl)) {
+            return false;
+        }
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                 .eq(ShortLinkDO::getFullShortUrl, fullShortUrl);
         ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
@@ -102,6 +104,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             String shortUri = HashUtil.hashToBase62(originUrlWithSalt);
             String fullShortUrl = buildFullShortUrl(requestParam.getDomain(), shortUri);
             if (!hasFullShortUrl(fullShortUrl)) {
+                bloomFilter.add(fullShortUrl);
                 return shortUri;
             }
         }
