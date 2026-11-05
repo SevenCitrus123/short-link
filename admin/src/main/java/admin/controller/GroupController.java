@@ -6,6 +6,8 @@ import admin.dto.req.ShortLinkGroupSaveReqDTO;
 import admin.dto.req.ShortLinkGroupSortReqDTO;
 import admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import admin.dto.resp.ShortLinkGroupRespDTO;
+import admin.remote.dto.ShortLinkRemoteService;
+import admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Delete;
@@ -62,4 +64,5 @@ public class GroupController {
         groupService.sortGroup(requestParam);
         return Results.success();
     }
+
 }

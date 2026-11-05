@@ -3,6 +3,7 @@ package project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,14 +17,14 @@ import project.common.enums.ShortLinkErrorCodeEnum;
 import project.dao.entity.ShortLinkDO;
 import project.dao.mapper.ShortLinkMapper;
 import project.dto.req.ShortLinkCreateReqDTO;
+import project.dto.req.ShortLinkGroupCountQueryRespDTO;
 import project.dto.req.ShortLinkPageReqDTO;
 import project.dto.resp.ShortLinkCreateRespDTO;
 import project.dto.resp.ShortLinkPageRespDTO;
 import project.service.ShortLinkService;
 import project.util.HashUtil;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +75,19 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .orderByAsc(ShortLinkDO::getCreateTime);
         IPage<ShortLinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
         return resultPage.convert(each -> BeanUtil.copyProperties(each, ShortLinkPageRespDTO.class));
+    }
+
+    @Override
+    public List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
+        QueryWrapper<ShortLinkDO> queryWrapper = Wrappers.query(new ShortLinkDO())
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", requestParam)
+                .eq("enable_status", 0)
+                .eq("del_flag", 0)
+                .eq("del_time", 0L)
+                .groupBy("gid");
+        List<Map<String, Object>> shortLinkDOList = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
     }
 
 

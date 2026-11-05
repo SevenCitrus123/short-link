@@ -1,6 +1,5 @@
 package admin.service.impl;
 
-import admin.common.biz.user.UserContext;
 import admin.common.convention.exception.ClientException;
 import admin.common.enums.UserErrorCodeEnum;
 import admin.dao.entity.UserDO;
@@ -10,6 +9,7 @@ import admin.dto.req.UserRegisterReqDTO;
 import admin.dto.req.UserUpdateReqDTO;
 import admin.dto.resp.UserLoginRespDTO;
 import admin.dto.resp.UserRespDTO;
+import admin.service.GroupService;
 import admin.service.UserServcie;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSON;
@@ -25,6 +25,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     final RedissonClient redissonClient;
 
     final StringRedisTemplate stringRedisTemplate;
+
+    final GroupService groupService;
 
     @Override
     public UserRespDTO getUserByUsername(String username) {
@@ -67,19 +70,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return userDO != null;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void register(UserRegisterReqDTO userRegisterReqDTO) {
-        if (hasUsername(userRegisterReqDTO.getUsername())) {
+    public void register(UserRegisterReqDTO requestParam) {
+        if (hasUsername(requestParam.getUsername())) {
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
-        RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + userRegisterReqDTO.getUsername());
+        RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
         try {
             if (lock.tryLock()) {
-                int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterReqDTO, UserDO.class));
+                int inserted = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
                 if (inserted < 1) {
                     throw new ClientException(UserErrorCodeEnum.USER_SAVE_FAIL);
                 }
-                stringRBloomFilter.add(userRegisterReqDTO.getUsername());
+                groupService.saveGroup(requestParam.getUsername(), "默认分组");
+                stringRBloomFilter.add(requestParam.getUsername());
                 return;
             }
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);

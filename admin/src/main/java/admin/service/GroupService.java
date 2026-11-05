@@ -46,4 +46,11 @@ public interface GroupService extends IService<GroupDO> {
      * @param requestParam 排序分组参数
      */
     void sortGroup(List<ShortLinkGroupSortReqDTO> requestParam);
+
+    /**
+     * 新增用户时新增分组
+     * @param username 用户名
+     * @param groupName 分组名
+     */
+    void saveGroup(String username, String groupName);
 }
