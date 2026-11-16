@@ -67,4 +67,15 @@ public class ShortLinkRemoteService {
                 new TypeReference<Result<List<ShortLinkGroupCountQueryRespDTO>>>() {
                 });
     }
+
+    /**
+     * 获取目标网站标题功能
+     */
+    public Result<String> getTitleByUrl(String url) {
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("url", url);
+        String resultStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title", requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<Result<String>>() {
+        });
+    }
 }

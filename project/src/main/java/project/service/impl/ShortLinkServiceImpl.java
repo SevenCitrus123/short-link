@@ -13,6 +13,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -43,6 +47,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static project.common.constant.RedisKeyConstant.*;
+import static project.service.impl.UrlTitleServiceImpl.USER_AGENT;
 
 @Slf4j
 @Service
@@ -70,17 +75,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         String fullShortUrl = buildFullShortUrl(defaultDomain, suffix);
         ShortLinkDO shortLinkDO = ShortLinkDO.builder()
                 .domain(defaultDomain)
-                .shortUri(suffix)
-                .fullShortUrl(fullShortUrl)
-                .originUrl(requestParam.getOriginUrl())
-                .gid(requestParam.getGid())
-                .createdType(requestParam.getCreatedType())
-                .validDateType(requestParam.getValidDateType())
-                .validDate(requestParam.getValidDate())
-                .describe(requestParam.getDescribe())
-                .enableStatus(0)
-                .clickNum(0).totalPv(0).totalUv(0).totalUip(0).delFlag(0).delTime(0L)
-                .build();
+                .favicon(getFavicon(requestParam.getOriginUrl()))
+                        .shortUri(suffix)
+                        .fullShortUrl(fullShortUrl)
+                        .originUrl(requestParam.getOriginUrl())
+                        .gid(requestParam.getGid())
+                        .createdType(requestParam.getCreatedType())
+                        .validDateType(requestParam.getValidDateType())
+                        .validDate(requestParam.getValidDate())
+                        .describe(requestParam.getDescribe())
+                        .enableStatus(0)
+                        .clickNum(0).totalPv(0).totalUv(0).totalUip(0).delFlag(0).delTime(0L)
+                        .build();
         ShortLinkGotoDO shortLinkGotoDO = ShortLinkGotoDO.builder()
                 .gid(requestParam.getGid())
                 .fullShortUrl(fullShortUrl)
@@ -287,6 +293,32 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         } catch (Exception ex) {
             log.warn("短链接缓存预热失败，fullShortUrl={}", fullShortUrl, ex);
+        }
+    }
+
+    private String getFavicon(String url) {
+        try {
+            Connection.Response response = Jsoup.connect(url)
+                    .timeout(3000)
+                    .userAgent(USER_AGENT)
+                    .followRedirects(true)
+                    .execute();
+            if (response.statusCode() != 200) {
+                return null;
+            }
+            Document document = response.parse();
+            Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon]").first();
+            if (faviconLink == null) {
+                return null;
+            }
+            String favicon = faviconLink.attr("abs:href");
+            if (StrUtil.isBlank(favicon) || favicon.length() > 250) {
+                return null;
+            }
+            return favicon;
+        } catch (Exception ex) {
+            log.warn("获取网站图标失败，url={}", url, ex);
+            return null;
         }
     }
 }
