@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class ShortUriCreateCachePenetrationBloomFilter {
 
     /**
-     * 防止查询fullShortLink时查询数据库的布隆过滤器
+     * 防止查询fullShort6Link时查询数据库的布隆过滤器
      */
     @Bean
     public RBloomFilter<String> shortUriCreateBloomFilter(RedissonClient redissonClient) {

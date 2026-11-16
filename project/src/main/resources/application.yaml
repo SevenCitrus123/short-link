@@ -18,3 +18,10 @@ spring:
       port: 6379
       password: 123456
       database: 1
+short-link:
+  domain:
+    default: www.shortlink.com
+  cache:
+    preheat:
+      enable: true
+      limit: 1000
