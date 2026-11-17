@@ -25,4 +25,13 @@ public class RedisKeyConstant {
     public static final long GOTO_IS_NULL_CACHE_TIME = 30 * 60 * 1000L;
 
     public static final long GOTO_EXPIRED_CACHE_TIME = 5 * 60 * 1000L;
+
+
+    public static final String SHORT_LINK_STATS_UV_KEY = "short-link:stats:uv:";
+
+    public static final String SHORT_LINK_STATS_UIP_KEY = "short-link:stats:uip:";
+
+    public static final String SHORT_LINK_STATS_STREAM_TOPIC_KEY = "short-link:stats-stream";
+
+    public static final String SHORT_LINK_STATS_STREAM_GROUP_KEY = "short-link:stats-stream:only-group";
 }

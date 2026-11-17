@@ -1,6 +1,7 @@
 package admin.remote.dto;
 
 import admin.common.convention.result.Result;
+import admin.dto.req.RecycleBinSaveReqDTO;
 import admin.dto.resp.ShortLinkGroupRespDTO;
 import admin.remote.dto.req.ShortLinkCreateReqDTO;
 import admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
@@ -56,6 +57,21 @@ public class ShortLinkRemoteService {
 
 
     /**
+     * 分页查询回收站短链接
+     */
+    public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinShortLink(List<String> gidList, long current, long size) {
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("gidList", gidList);
+        requestMap.put("current", current);
+        requestMap.put("size", size);
+        String resultStr = HttpUtil.get(
+                "http://127.0.0.1:8001/api/short-link/admin/v1/recycle-bin/page", requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<Result<IPage<ShortLinkPageRespDTO>>>() {
+        });
+    }
+
+
+    /**
      * 查询用户拥有的短链接
      */
     public Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(List<String> gids) {
@@ -77,5 +93,16 @@ public class ShortLinkRemoteService {
         String resultStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title", requestMap);
         return JSON.parseObject(resultStr, new TypeReference<Result<String>>() {
         });
+    }
+
+    /**
+     * 将短链接添加至回收站
+     */
+    public void saveRecycleBin(RecycleBinSaveReqDTO requestParam) {
+        String url = "http://127.0.0.1:8001/api/short-link/admin/v1/recycle-bin/save";
+        HttpRequest.post(url)
+                .body(JSON.toJSONString(requestParam))
+                .contentType("application/json")
+                .execute();
     }
 }
