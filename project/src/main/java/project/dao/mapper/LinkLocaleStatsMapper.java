@@ -1,0 +1,25 @@
+package project.dao.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import project.dao.entity.LinkLocaleStatsDO;
+import project.dto.req.ShortLinkStatsReqDTO;
+
+import java.util.List;
+import java.util.Map;
+
+public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
+
+    @Insert("INSERT INTO t_link_locale_stats (full_short_url, date, cnt, country, province, city, adcode, create_time, update_time, del_flag) " +
+            "VALUES (#{s.fullShortUrl}, #{s.date}, #{s.cnt}, #{s.country}, #{s.province}, #{s.city}, #{s.adcode}, NOW(), NOW(), 0) " +
+            "ON DUPLICATE KEY UPDATE cnt = cnt + #{s.cnt}")
+    void shortLinkLocaleState(@Param("s") LinkLocaleStatsDO linkLocaleStatsDO);
+
+    @Select("SELECT province, SUM(cnt) AS count FROM t_link_locale_stats " +
+            "WHERE full_short_url = #{param.fullShortUrl} " +
+            "AND date BETWEEN #{param.startDate} AND #{param.endDate} " +
+            "GROUP BY province")
+    List<Map<String, Object>> listLocaleStatsByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
+}

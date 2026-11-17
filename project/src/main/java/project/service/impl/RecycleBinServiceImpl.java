@@ -19,6 +19,8 @@ import project.dao.entity.LinkStatsTodayDO;
 import project.dao.entity.ShortLinkDO;
 import project.dao.mapper.LinkStatsTodayMapper;
 import project.dao.mapper.ShortLinkMapper;
+import project.dto.req.RecycleBinRecoverReqDTO;
+import project.dto.req.RecycleBinRemoveReqDTO;
 import project.dto.req.RecycleBinSaveReqDTO;
 import project.dto.req.ShortLinkRecycleBinPageReqDTO;
 import project.dto.resp.ShortLinkPageRespDTO;
@@ -30,6 +32,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
 
 @Slf4j
@@ -56,6 +59,41 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
             throw new ClientException(ShortLinkErrorCodeEnum.SHORT_LINK_NULL);
         }
         stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+    }
+
+    @Override
+    public void recoverRecycleBin(RecycleBinRecoverReqDTO requestParam) {
+        LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnableStatus, 1)
+                .eq(ShortLinkDO::getDelFlag, 0);
+        ShortLinkDO shortLinkDO = ShortLinkDO.builder()
+                .enableStatus(0)
+                .build();
+        int rows = baseMapper.update(shortLinkDO, updateWrapper);
+        if (rows == 0) {
+            throw new ClientException(ShortLinkErrorCodeEnum.SHORT_LINK_NULL);
+        }
+        stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+    }
+
+    @Override
+    public void removeRecycleBin(RecycleBinRemoveReqDTO requestParam) {
+        LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnableStatus, 1)
+                .eq(ShortLinkDO::getDelTime, 0L)
+                .eq(ShortLinkDO::getDelFlag, 0);
+        ShortLinkDO delShortLinkDO = ShortLinkDO.builder()
+                .delTime(System.currentTimeMillis())
+                .build();
+        delShortLinkDO.setDelFlag(1);
+        int rows = baseMapper.update(delShortLinkDO, updateWrapper);
+        if (rows == 0) {
+            throw new ClientException(ShortLinkErrorCodeEnum.SHORT_LINK_NULL);
+        }
     }
 
     @Override

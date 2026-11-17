@@ -25,3 +25,6 @@ short-link:
     preheat:
       enable: true
       limit: 1000
+  stats:
+    locale:
+      amap-key:
